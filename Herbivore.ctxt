@@ -1,0 +1,9 @@
+#BlueJ class context
+comment0.target=Herbivore
+comment0.text=\n\ Write\ a\ description\ of\ class\ Herbivore\ here.\n\n\ @author\ (your\ name)\n\ @version\ (a\ version\ number\ or\ a\ date)\n
+comment1.params=PLANT_FOOD_VALUE
+comment1.target=Herbivore(int)
+comment2.params=
+comment2.target=Location\ findPlants()
+comment2.text=\n\ Look\ for\ plants\ adjacent\ to\ the\ current\ location.\n\ Only\ the\ first\ live\ plant\ is\ eaten.\n\ @return\ Where\ food\ was\ found,\ or\ null\ if\ it\ wasn't.\n
+numComments=3

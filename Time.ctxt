@@ -1,0 +1,21 @@
+#BlueJ class context
+comment0.target=Time
+comment0.text=\n\ Write\ a\ description\ of\ class\ Time\ here.\n\n\ @author\ (your\ name)\n\ @version\ (a\ version\ number\ or\ a\ date)\n
+comment1.params=
+comment1.target=Time()
+comment1.text=\n\ Constructor\ for\ objects\ of\ class\ Time\n
+comment2.params=
+comment2.target=void\ timeIncrement()
+comment2.text=\n\ Increment\ time\ by\ a\ minute.\n\ If\ @minutes\ counter\ reaches\ 60,\ reset\ it\ to\ 0\ and\ increment\ @hours\n\ If\ @hours\ counter\ reaches\ 24,\ reset\ it\ to\ 0.\n
+comment3.params=
+comment3.target=java.lang.String\ getTimeString()
+comment3.text=\n\ @return\ the\ current\ time\ as\ a\ String\ in\ the\ HH\:MM\ time\ format\n
+comment4.params=
+comment4.target=void\ resetTime()
+comment5.params=
+comment5.target=int\ getMinutes()
+comment6.params=
+comment6.target=int\ getHours()
+comment7.params=
+comment7.target=boolean\ isNighttime()
+numComments=8
