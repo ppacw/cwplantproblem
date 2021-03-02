@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.awt.Color;
 import java.util.concurrent.ThreadLocalRandom;
 
+
+
 /**
  * A simple predator-prey simulator, based on a rectangular field
  * containing rabbits and foxes.
@@ -22,17 +24,20 @@ public class Simulator
     // The probability that a fox will be created in any given grid position.
     private static final double FOX_CREATION_PROBABILITY = 0.02;
     // The probability that a rabbit will be created in any given grid position.
-    private static final double RABBIT_CREATION_PROBABILITY = 0.08;    
-    
+    private static final double RABBIT_CREATION_PROBABILITY = 0.16;    
     // The probability that a eagle will be created in any given grid position.
     private static final double EAGLE_CREATION_PROBABILITY = 0.02 + 1;
     // The probability that a rabbit will be created in any given grid position.
-    private static final double EARTHWORM_CREATION_PROBABILITY = 0.05 + 2;
+    private static final double EARTHWORM_CREATION_PROBABILITY = 0.16 + 2;
     // The probability that a rabbit will be created in any given grid position.
     private static final double OWL_CREATION_PROBABILITY = 0.02 + 2;
+    // The probability that a rabbit will be created in any given grid position.
+    private static final double TORTOISE_CREATION_PROBABILITY = 0.08 + 3;
+    // The probability that a rabbit will be created in any given grid position.
+    private static final double PLANT_CREATION_PROBABILITY = 0.15 + 3;
 
-    // List of animals in the field.
-    private List<Animal> animals;
+    // List of actors in the field.
+    private List<Actor> actors;
     // The current state of the field.
     private Field field;
     // The current step of the simulation.
@@ -41,6 +46,9 @@ public class Simulator
     private SimulatorView view;
     // An instance of time
     private Time time;
+    //plant step counter, only grow plant every 5 steps.
+    private int plantCounter = 0;
+    
 
     /**
      * Construct a simulation field with default size.
@@ -64,7 +72,7 @@ public class Simulator
             width = DEFAULT_WIDTH;
         }
 
-        animals = new ArrayList<>();
+        actors = new ArrayList<>();
         field = new Field(depth, width);
         time = new Time();
 
@@ -74,10 +82,10 @@ public class Simulator
         view = new SimulatorView(depth, width);
         view.setColor(Rabbit.class, new Color(155, 85, 55));
         view.setColor(Fox.class, new Color(212, 112, 68));
-        
         view.setColor(Eagle.class, new Color(50, 13, 13));
-        view.setColor(Earthworm.class, new Color(58, 136, 41));
+        view.setColor(Earthworm.class, new Color(255, 255, 0));
         view.setColor(Owl.class, new Color(68, 57, 101));
+        view.setColor(Plant.class, new Color(0, 255, 51));
 
         // Setup a valid starting point.
         reset();
@@ -113,21 +121,32 @@ public class Simulator
     public void simulateOneStep()
     {
         step++;
+        plantCounter++;
 
-        // Provide space for newborn animals.
-        List<Animal> newAnimals = new ArrayList<>();        
-        // Let all animals act.
-        for(Iterator<Animal> it = animals.iterator(); it.hasNext(); ) {
-            Animal animal = it.next();
-            if (!animal.isNocturnal() && !time.isNighttime() || animal.isNocturnal() && time.isNighttime())
-                animal.act(newAnimals);
-            if(! animal.isAlive()) {
-                it.remove();
+        // Provide space for newborn actors.
+        List<Actor> newActors = new ArrayList<>();        
+        // Let all actors act.
+        for(Iterator<Actor> it = actors.iterator(); it.hasNext(); ) {
+            Actor actor = it.next();
+            if (!actor.isNocturnal() && !time.isNighttime() || actor.isNocturnal() && time.isNighttime())
+            if(!(actor instanceof Plant)){
+                if(! actor.isAlive()) {
+                    it.remove();
+                } else {
+                    actor.act(newActors);
+                }
+            } else {
+                if (actor instanceof Plant){
+                    if(plantCounter % 10 == 0){ actor.act(newActors); }
+                } 
             }
         }
+        
+        
+       
 
         // Add the newly born foxes and rabbits to the main lists.
-        animals.addAll(newAnimals);
+        actors.addAll(newActors);
 
         time.timeIncrement();
         view.showStatus(step, field, time.getTimeString());
@@ -141,7 +160,8 @@ public class Simulator
         //if (time.getMinutes() % 59 == 0){
          //   changeBrightness();
         //}
-    }
+       }
+    
 
     /**
      * Reset the simulation to a starting position.
@@ -149,7 +169,7 @@ public class Simulator
     public void reset()
     {
         step = 0;
-        animals.clear();
+        actors.clear();
         populate();
         time.resetTime();
         // Show the starting state in the view.
@@ -191,6 +211,7 @@ public class Simulator
         if (time.isNighttime()){
             view.setColor(Rabbit.class, new Color(view.getColor(Rabbit.class).getRed()*brightness, view.getColor(Rabbit.class).getGreen()*brightness, view.getColor(Rabbit.class).getBlue()*brightness));
             view.setColor(Fox.class, new Color(view.getColor(Fox.class).getRed()*brightness, view.getColor(Fox.class).getGreen()*brightness, view.getColor(Fox.class).getBlue()*brightness));
+            
             view.setColor(Eagle.class, new Color(view.getColor(Eagle.class).getRed()*brightness, view.getColor(Eagle.class).getGreen()*brightness, view.getColor(Eagle.class).getBlue()*brightness));
             view.setColor(Earthworm.class, new Color(view.getColor(Earthworm.class).getRed()*brightness, view.getColor(Earthworm.class).getGreen()*brightness, view.getColor(Earthworm.class).getBlue()*brightness));
             view.setColor(Owl.class, new Color(view.getColor(Owl.class).getRed()*brightness, view.getColor(Owl.class).getGreen()*brightness, view.getColor(Owl.class).getBlue()*brightness));
@@ -210,40 +231,46 @@ public class Simulator
         field.clear();
         for(int row = 0; row < field.getDepth(); row++) {
             for(int col = 0; col < field.getWidth(); col++) {
-                randomNum = ThreadLocalRandom.current().nextInt(0, 2 + 1);
+                randomNum = ThreadLocalRandom.current().nextInt(0, 3 + 1);
 
                 switch(randomNum){
                     case 0:
                     if(rand.nextDouble() <= FOX_CREATION_PROBABILITY) {
                         Location location = new Location(row, col);
                         Fox fox = new Fox(true, field, location);
-                        animals.add(fox);
+                        actors.add(fox);
                     }
                     else if(rand.nextDouble() <= RABBIT_CREATION_PROBABILITY) {
                         Location location = new Location(row, col);
                         Rabbit rabbit = new Rabbit(true, field, location);
-                        animals.add(rabbit);
+                        actors.add(rabbit);
                     }
                     case 1:
                     if(rand.nextDouble() + 1  <= EAGLE_CREATION_PROBABILITY) {
                         Location location = new Location(row, col);
                         Eagle eagle = new Eagle(true, field, location);
-                        animals.add(eagle);
+                        actors.add(eagle);
                     }
                     
                     case 2:
                     if(rand.nextDouble() + 2 <= EARTHWORM_CREATION_PROBABILITY) {
                         Location location = new Location(row, col);
                         Earthworm earthworm = new Earthworm(true, field, location);
-                        animals.add(earthworm);
+                        actors.add(earthworm);
                     }
                     else if(rand.nextDouble() + 2 <= OWL_CREATION_PROBABILITY) {
                         Location location = new Location(row, col);
                         Owl owl = new Owl(true, field, location);
-                        animals.add(owl);
+                        actors.add(owl);
                     }
-                    // else leave the location empty.
-                }
+                    case 3:
+                    if(rand.nextDouble() + 3 <= PLANT_CREATION_PROBABILITY) {
+                        Location location = new Location(row, col);
+                        Plant plant = new Plant(field, location);
+                        actors.add(plant);
+                        // else leave the location empty.
+                    }
+              }
             }
         }
     }
